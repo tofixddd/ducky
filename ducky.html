@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quack Bank</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black; /* Black background */
+            position: relative;
+            color: white; /* Text in white */
+        }
+
+        /* "RIP Ducky 🦆" in the top-middle */
+        .top-middle {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Button "Quack Bank" in the middle-right */
+        .quack-button, .leaderboard-button {
+            position: absolute;
+            right: 20px;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Quack Bank Button */
+        .quack-button {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Leaderboard Button */
+        .leaderboard-button {
+            top: 70%;
+            transform: translateY(-70%);
+        }
+
+        /* Center content styling */
+        .login-form {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Input fields */
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Login button */
+        .login-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Displaying quack information */
+        .quack-info {
+            display: none;
+            text-align: center;
+        }
+
+        .quack-info p {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        /* Leaderboard styling */
+        .leaderboard {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid white;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Middle Text -->
+    <div class="top-middle">RIP Ducky 🦆</div>
+
+    <!-- Quack Bank Button -->
+    <button class="quack-button" onclick="showLogin()">Quack Bank</button>
+
+    <!-- Leaderboard Button -->
+    <button class="leaderboard-button" onclick="showLeaderboard()">Leaderboard</button>
+
+    <!-- Login Form (hidden initially) -->
+    <div class="login-form" id="loginForm">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="login-btn" onclick="login()">Login</button>
+    </div>
+
+    <!-- Quack Information -->
+    <div class="quack-info" id="quackInfo">
+        <p id="checking"></p>
+        <p id="savings"></p>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <div class="leaderboard" id="leaderboard">
+        <h2>Quack Bank Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Total Balance</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+                <!-- Leaderboard data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const users = [
+            { id: '1423', password: 'ripducky2', checking: 900917, savings: 2010831, title: 'Vice President' },
+            { id: '1432', password: 'ripducky', checking: 1000000, savings: 3800000, title: 'President' },
+            { id: '8162', password: 'swifty13', checking: 90000, savings: 2000000, title: '' }
+        ];
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'flex';
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(user => user.id === username && user.password === password);
+
+            if (user) {
+                displayQuacks(user.checking, user.savings);
+            } else {
+                alert('Incorrect username or password.');
+            }
+        }
+
+        // Display the quack info based on login
+        function displayQuacks(checkingAmount, savingsAmount) {
+            document.getElementById('loginForm').style.display = 'none'; // Hide login form
+            document.getElementById('quackInfo').style.display = 'block'; // Show quack info
+
+            document.getElementById('checking').innerText = checkingAmount + " quacks in checking";
+            document.getElementById('savings').innerText = savingsAmount + " quacks in savings";
+        }
+
+        // Show the leaderboard (sorted from highest to lowest balance)
+        function showLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            leaderboardBody.innerHTML = ''; // Clear existing rows
+
+            // Sort users by total balance in descending order
+            const sortedUsers = users.sort((a, b) => (b.checking + b.savings) - (a.checking + a.savings));
+
+            // Loop through sorted users and populate the leaderboard
+            sortedUsers.forEach(user => {
+                const totalBalance = user.checking + user.savings;
+                const row = document.createElement('tr');
+                
+                // Display the username and title
+                let userDisplay = user.id;
+                if (user.title) {
+                    userDisplay += ` (${user.title})`;
+                }
+
+                row.innerHTML = `<td>${userDisplay}</td><td>${totalBalance} quacks</td>`;
+                leaderboardBody.appendChild(row);
+            });
+
+            document.getElementById('leaderboard').style.display = 'block'; // Show the leaderboard
+        }
+    </script>
+
+</body>
+</html>
