@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quack Bank</title>
+    <title>Quack Bank & Ducky Clicker</title>
     <style>
         body {
             margin: 0;
@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: black; /* Black background */
+            background: linear-gradient(to bottom, yellow, black); /* Gradient background */
             position: relative;
             color: white; /* Text in white */
         }
@@ -28,8 +28,8 @@
             font-weight: bold;
         }
 
-        /* Button "Quack Bank" in the middle-right */
-        .quack-button, .leaderboard-button {
+        /* Buttons styling */
+        .quack-button, .leaderboard-button, .clicker-button, .shop-button {
             position: absolute;
             right: 20px;
             padding: 15px 30px;
@@ -53,7 +53,19 @@
             transform: translateY(-70%);
         }
 
-        /* Center content styling */
+        /* Ducky Clicker Button */
+        .clicker-button {
+            top: 80%;
+            transform: translateY(-80%);
+        }
+
+        /* Shop Button */
+        .shop-button {
+            top: 60%;
+            transform: translateY(-60%);
+        }
+
+        /* Login form styling */
         .login-form {
             display: none;
             flex-direction: column;
@@ -61,7 +73,6 @@
             gap: 10px;
         }
 
-        /* Input fields */
         input[type="text"], input[type="password"] {
             padding: 10px;
             width: 200px;
@@ -69,7 +80,6 @@
             border-radius: 5px;
         }
 
-        /* Login button */
         .login-btn {
             padding: 10px 20px;
             background-color: #28a745;
@@ -79,7 +89,6 @@
             cursor: pointer;
         }
 
-        /* Displaying quack information */
         .quack-info {
             display: none;
             text-align: center;
@@ -114,6 +123,44 @@
             background-color: #007bff;
             font-weight: bold;
         }
+
+        /* Ducky Clicker Game */
+        .clicker-game {
+            display: none;
+            text-align: center;
+        }
+
+        .duck-img {
+            cursor: pointer;
+            width: 100px;
+        }
+
+        .upgrade-btn {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Shop Section */
+        .shop {
+            display: none;
+            text-align: center;
+        }
+
+        .shop-item {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+
+        .shop-item span {
+            color: red;
+            font-style: italic;
+        }
+
     </style>
 </head>
 <body>
@@ -127,7 +174,13 @@
     <!-- Leaderboard Button -->
     <button class="leaderboard-button" onclick="showLeaderboard()">Leaderboard</button>
 
-    <!-- Login Form (hidden initially) -->
+    <!-- Ducky Clicker Button -->
+    <button class="clicker-button" onclick="showClicker()">Ducky Clicker</button>
+
+    <!-- Shop Button -->
+    <button class="shop-button" onclick="showShop()">Shop</button>
+
+    <!-- Login Form -->
     <div class="login-form" id="loginForm">
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
@@ -156,11 +209,35 @@
         </table>
     </div>
 
+    <!-- Ducky Clicker Section -->
+    <div class="clicker-game" id="clickerGame">
+        <h2>Ducky Clicker</h2>
+        <!-- Duck emoji used here -->
+        <p class="duck-img" onclick="incrementQuacks()">🦆</p>
+        <p id="clicksDisplay">Quacks: 0</p>
+        <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">Buy Upgrade (Cost: 100 quacks, +1 quack/click)</button>
+        <br>
+        <button class="upgrade-btn" onclick="saveGame()">Save Game</button>
+        <input type="file" id="loadFile" onchange="loadGame()" style="display: none;">
+        <button class="upgrade-btn" onclick="document.getElementById('loadFile').click()">Load Save</button>
+    </div>
+
+    <!-- Shop Section -->
+    <div class="shop" id="shopSection">
+        <h2>Shop</h2>
+        <div class="shop-item">Random Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+        <div class="shop-item">Common Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+        <div class="shop-item">Rare Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+        <div class="shop-item">Legendary Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+        <div class="shop-item">Mythical Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+    </div>
+
     <script>
+        // Leaderboard user data
         const users = [
-            { id: '1423', password: 'ripducky2', checking: 900917, savings: 2010831, title: 'Vice President' },
-            { id: '1432', password: 'ripducky', checking: 1000000, savings: 3800000, title: 'President' },
-            { id: '8162', password: 'swifty13', checking: 90000, savings: 2000000, title: '' }
+            { id: '1423', name: 'Olivers', password: 'ripducky2', checking: 900917, savings: 2010831, title: 'Vice President' },
+            { id: '1432', name: 'Samanta', password: 'ripducky', checking: 1000000, savings: 3800000, title: 'President' },
+            { id: '8162', name: 'Mason', password: 'swifty13', checking: 90000, savings: 2000000, title: '' }
         ];
 
         function showLogin() {
@@ -180,39 +257,100 @@
             }
         }
 
-        // Display the quack info based on login
+        // Display quack info
         function displayQuacks(checkingAmount, savingsAmount) {
-            document.getElementById('loginForm').style.display = 'none'; // Hide login form
-            document.getElementById('quackInfo').style.display = 'block'; // Show quack info
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('quackInfo').style.display = 'block';
 
             document.getElementById('checking').innerText = checkingAmount + " quacks in checking";
             document.getElementById('savings').innerText = savingsAmount + " quacks in savings";
         }
 
-        // Show the leaderboard (sorted from highest to lowest balance)
+        // Show leaderboard
         function showLeaderboard() {
             const leaderboardBody = document.getElementById('leaderboardBody');
-            leaderboardBody.innerHTML = ''; // Clear existing rows
+            leaderboardBody.innerHTML = ''; // Clear previous data
 
-            // Sort users by total balance in descending order
-            const sortedUsers = users.sort((a, b) => (b.checking + b.savings) - (a.checking + a.savings));
+            // Sort users by total balance
+            users.sort((a, b) => (b.checking + b.savings) - (a.checking + a.savings));
 
-            // Loop through sorted users and populate the leaderboard
-            sortedUsers.forEach(user => {
-                const totalBalance = user.checking + user.savings;
+            users.forEach(user => {
                 const row = document.createElement('tr');
-                
-                // Display the username and title
-                let userDisplay = user.id;
-                if (user.title) {
-                    userDisplay += ` (${user.title})`;
-                }
+                const totalBalance = user.checking + user.savings;
+                const title = user.title ? ` (${user.title})` : ''; // Display title if exists
 
-                row.innerHTML = `<td>${userDisplay}</td><td>${totalBalance} quacks</td>`;
+                row.innerHTML = `
+                    <td>${user.name}${title}</td>
+                    <td>${totalBalance}</td>
+                `;
                 leaderboardBody.appendChild(row);
             });
 
-            document.getElementById('leaderboard').style.display = 'block'; // Show the leaderboard
+            document.getElementById('leaderboard').style.display = 'block';
+        }
+
+        // Show Ducky Clicker game
+        function showClicker() {
+            document.getElementById('clickerGame').style.display = 'block';
+        }
+
+        // Clicker game logic
+        let quacks = 0;
+        let quacksPerClick = 1;
+        let upgradeCost = 100;
+
+        function incrementQuacks() {
+            quacks += quacksPerClick;
+            document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
+        }
+
+        function buyUpgrade() {
+            if (quacks >= upgradeCost) {
+                quacks -= upgradeCost;
+                quacksPerClick += 1;
+                upgradeCost *= 2; // Double the upgrade cost after each purchase
+                document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
+                document.getElementById('upgradeBtn').innerText = `Buy Upgrade (Cost: ${upgradeCost} quacks, +1 quack/click)`;
+                alert('Upgrade Purchased! Quacks per click increased.');
+            } else {
+                alert('Not enough quacks!');
+            }
+        }
+
+        // Save game
+        function saveGame() {
+            const gameData = {
+                quacks: quacks,
+                quacksPerClick: quacksPerClick
+            };
+            const blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ducky_clicker_save.json';
+            a.click();
+        }
+
+        // Load game
+        function loadGame() {
+            const fileInput = document.getElementById('loadFile');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const gameData = JSON.parse(event.target.result);
+                quacks = gameData.quacks;
+                quacksPerClick = gameData.quacksPerClick;
+                document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
+                alert('Game Loaded!');
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Show Shop
+        function showShop() {
+            document.getElementById('shopSection').style.display = 'block';
         }
     </script>
 
