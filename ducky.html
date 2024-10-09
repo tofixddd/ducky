@@ -29,7 +29,7 @@
         }
 
         /* Buttons styling */
-        .quack-button, .leaderboard-button, .clicker-button, .shop-button {
+        .quack-button, .leaderboard-button, .clicker-button, .shop-button, .events-button {
             position: absolute;
             right: 20px;
             padding: 15px 30px;
@@ -63,6 +63,12 @@
         .shop-button {
             top: 60%;
             transform: translateY(-60%);
+        }
+
+        /* Events Button */
+        .events-button {
+            top: 90%;
+            transform: translateY(-90%);
         }
 
         /* Login form styling */
@@ -161,6 +167,21 @@
             font-style: italic;
         }
 
+        /* Events Section */
+        .events {
+            display: none;
+            text-align: center;
+        }
+
+        .events-item {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+
+        .events-item span {
+            font-style: italic;
+        }
+
     </style>
 </head>
 <body>
@@ -179,6 +200,9 @@
 
     <!-- Shop Button -->
     <button class="shop-button" onclick="showShop()">Shop</button>
+
+    <!-- Events Button -->
+    <button class="events-button" onclick="showEvents()">Events</button>
 
     <!-- Login Form -->
     <div class="login-form" id="loginForm">
@@ -230,6 +254,13 @@
         <div class="shop-item">Rare Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
         <div class="shop-item">Legendary Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
         <div class="shop-item">Mythical Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+        <div class="shop-item">Special Ducky Pack - <span>Sold out, restocking on Friday the 11th</span></div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="events" id="eventsSection">
+        <h2>Upcoming Events</h2>
+        <div class="events-item">Ducky Code - <span>Starts tomorrow</span></div>
     </div>
 
     <script>
@@ -249,21 +280,14 @@
             const password = document.getElementById('password').value;
 
             const user = users.find(user => user.id === username && user.password === password);
-
             if (user) {
-                displayQuacks(user.checking, user.savings);
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('quackInfo').style.display = 'block';
+                document.getElementById('checking').innerText = "Checking: " + user.checking + " quacks";
+                document.getElementById('savings').innerText = "Savings: " + user.savings + " quacks";
             } else {
-                alert('Incorrect username or password.');
+                alert('Invalid login');
             }
-        }
-
-        // Display quack info
-        function displayQuacks(checkingAmount, savingsAmount) {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('quackInfo').style.display = 'block';
-
-            document.getElementById('checking').innerText = checkingAmount + " quacks in checking";
-            document.getElementById('savings').innerText = savingsAmount + " quacks in savings";
         }
 
         // Show leaderboard
@@ -351,6 +375,11 @@
         // Show Shop
         function showShop() {
             document.getElementById('shopSection').style.display = 'block';
+        }
+
+        // Show Events
+        function showEvents() {
+            document.getElementById('eventsSection').style.display = 'block';
         }
     </script>
 
