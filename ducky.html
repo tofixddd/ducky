@@ -182,6 +182,25 @@
             font-style: italic;
         }
 
+        /* Right-hand menu for code */
+        .ducky-code-menu {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background-color: black;
+            padding: 10px;
+            border: 2px solid yellow;
+            border-radius: 8px;
+            color: yellow;
+        }
+
+        /* Upgrade Tab */
+        .upgrades-tab {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +263,12 @@
         <button class="upgrade-btn" onclick="saveGame()">Save Game</button>
         <input type="file" id="loadFile" onchange="loadGame()" style="display: none;">
         <button class="upgrade-btn" onclick="document.getElementById('loadFile').click()">Load Save</button>
+
+        <!-- New Upgrades Tab -->
+        <div class="upgrades-tab" id="upgradesTab">
+            <h3>Upgrades</h3>
+            <button class="upgrade-btn" onclick="rebirth()">Rebirth (Cost: 2 million quacks)</button>
+        </div>
     </div>
 
     <!-- Shop Section -->
@@ -259,129 +284,87 @@
 
     <!-- Events Section -->
     <div class="events" id="eventsSection">
-        <h2>Upcoming Events</h2>
-        <div class="events-item">Ducky Code - <span>Online Right now!!</span></div>
+        <h2>Events</h2>
+        <div class="events-item">Event Quackathon - <span>Online Now!</span></div>
+        <div class="events-item">Grand Ducky Race - <span>Friday, 11th, restocking at 10AM UTC</span></div>
+    </div>
+
+    <!-- Ducky Code Menu -->
+    <div class="ducky-code-menu" id="duckyCodeMenu">
+        <h3>Special Code Unlocked!</h3>
+        <button class="upgrade-btn" onclick="revealCode()">See Ducky Code</button>
+        <p id="duckyCodeText" style="display: none;">freemythicalpackyay</p>
     </div>
 
     <script>
-        // Leaderboard user data
-        const users = [
-            { id: '1423', name: 'Olivers', password: 'ripducky2', checking: 900917, savings: 2010831, title: 'Vice President' },
-            { id: '1432', name: 'Samanta', password: 'ripducky', checking: 1000000, savings: 3800000, title: 'President' },
-            { id: '8162', name: 'Mason', password: 'swifty13', checking: 90000, savings: 2000000, title: '' }
-        ];
+        let quacks = 0;
+        let quacksPerClick = 1;
+        let upgradeCost = 100;
 
         function showLogin() {
             document.getElementById('loginForm').style.display = 'flex';
         }
 
         function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            const user = users.find(user => user.id === username && user.password === password);
-            if (user) {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('quackInfo').style.display = 'block';
-                document.getElementById('checking').innerText = "Checking: " + user.checking + " quacks";
-                document.getElementById('savings').innerText = "Savings: " + user.savings + " quacks";
-            } else {
-                alert('Invalid login');
-            }
+            // Your login logic here
         }
 
-        // Show leaderboard
         function showLeaderboard() {
-            const leaderboardBody = document.getElementById('leaderboardBody');
-            leaderboardBody.innerHTML = ''; // Clear previous data
-
-            // Sort users by total balance
-            users.sort((a, b) => (b.checking + b.savings) - (a.checking + a.savings));
-
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                const totalBalance = user.checking + user.savings;
-                const title = user.title ? ` (${user.title})` : ''; // Display title if exists
-
-                row.innerHTML = `
-                    <td>${user.name}${title}</td>
-                    <td>${totalBalance}</td>
-                `;
-                leaderboardBody.appendChild(row);
-            });
-
             document.getElementById('leaderboard').style.display = 'block';
         }
 
-        // Show Ducky Clicker game
         function showClicker() {
             document.getElementById('clickerGame').style.display = 'block';
         }
 
-        // Clicker game logic
-        let quacks = 0;
-        let quacksPerClick = 1;
-        let upgradeCost = 100;
-
         function incrementQuacks() {
             quacks += quacksPerClick;
-            document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
+            document.getElementById('clicksDisplay').textContent = `Quacks: ${quacks}`;
+            
+            if (quacks >= 2000000) {
+                document.getElementById('duckyCodeMenu').style.display = 'block';
+                document.getElementById('upgradesTab').style.display = 'block';
+            }
         }
 
         function buyUpgrade() {
             if (quacks >= upgradeCost) {
                 quacks -= upgradeCost;
                 quacksPerClick += 1;
-                upgradeCost *= 2; // Double the upgrade cost after each purchase
-                document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
-                document.getElementById('upgradeBtn').innerText = `Buy Upgrade (Cost: ${upgradeCost} quacks, +1 quack/click)`;
-                alert('Upgrade Purchased! Quacks per click increased.');
-            } else {
-                alert('Not enough quacks!');
+                upgradeCost *= 2;  // Double the cost after each purchase
+                document.getElementById('upgradeBtn').textContent = `Buy Upgrade (Cost: ${upgradeCost} quacks, +1 quack/click)`;
+                document.getElementById('clicksDisplay').textContent = `Quacks: ${quacks}`;
             }
         }
 
-        // Save game
         function saveGame() {
-            const gameData = {
-                quacks: quacks,
-                quacksPerClick: quacksPerClick
-            };
-            const blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ducky_clicker_save.json';
-            a.click();
+            // Your save game logic
         }
 
-        // Load game
         function loadGame() {
-            const fileInput = document.getElementById('loadFile');
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(event) {
-                const gameData = JSON.parse(event.target.result);
-                quacks = gameData.quacks;
-                quacksPerClick = gameData.quacksPerClick;
-                document.getElementById('clicksDisplay').innerText = `Quacks: ${quacks}`;
-                alert('Game Loaded!');
-            };
-
-            reader.readAsText(file);
+            // Your load game logic
         }
 
-        // Show Shop
         function showShop() {
             document.getElementById('shopSection').style.display = 'block';
         }
 
-        // Show Events
         function showEvents() {
             document.getElementById('eventsSection').style.display = 'block';
         }
-    </script>
 
+        function revealCode() {
+            document.getElementById('duckyCodeText').style.display = 'block';
+        }
+
+        function rebirth() {
+            if (quacks >= 2000000) {
+                quacks = 0;
+                quacksPerClick = 2; // Rebirth bonus - increase quacks per click
+                document.getElementById('clicksDisplay').textContent = `Quacks: ${quacks}`;
+                alert('Rebirth complete! Quacks per click doubled.');
+            }
+        }
+    </script>
 </body>
 </html>
